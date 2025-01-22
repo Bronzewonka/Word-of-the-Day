@@ -159,7 +159,8 @@
                 return;
             }
 
-            const blankWord = word.split('').map(letter => "_").join(' ');
+            // Preserve spaces and replace only letters with underscores
+            const blankWord = word.split('').map(letter => (letter === ' ' ? ' ' : '_')).join('');
             const outputDiv = document.getElementById("output");
 
             outputDiv.innerHTML = `<p><strong>Word:</strong> ${blankWord}</p>
