@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word of the Day - Extended</title>
+    <style>
+        :root {
+            --background-color: #5a5eff;
+            /* Soft blue */
+            --text-color: white;
+            --highlight-color: #80b380;
+            /* Softened green */
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10%),
+                radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 90vh;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--highlight-color);
+            text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+            font-size: 6em;
+            margin-bottom: 40px;
+        }
+
+        .input-container {
+            margin-top: 0;
+            /* Remove excessive top margin */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-container input {
+            padding: 15px;
+            margin: 10px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, font-size 0.3s ease;
+        }
+
+        .input-container input::placeholder {
+            color: #888;
+        }
+
+        .input-container button {
+            padding: 20px 40px;
+            margin-top: 50px;
+            font-size: 2em;
+            background-color: var(--highlight-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .input-container button:hover {
+            background-color: white;
+            color: var(--highlight-color);
+            transform: scale(1.05);
+        }
+
+        .output-container {
+            margin-top: 40px;
+            font-size: 2.5em;
+            /* Adjust font size for better readability */
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            /* Increased spacing between elements */
+            visibility: hidden;
+            /* Ensure it starts hidden */
+        }
+
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            /* Add more space between the two columns */
+            width: 90%;
+            /* Slightly wider to fill the space better */
+            margin: 0 auto;
+            /* Center align the grid */
+        }
+
+        .columns .left,
+        .columns .right {
+            background-color: rgba(255, 255, 255, 0.1);
+            /* Add a light background for distinction */
+            padding: 20px;
+            /* Add padding inside each column for better spacing */
+            border-radius: 8px;
+            /* Rounded corners for a cleaner look */
+        }
+
+        .columns .left p,
+        .columns .right p {
+            font-size: 1.2em;
+            /* Adjust heading size */
+            font-weight: bold;
+            margin-bottom: 10px;
+            /* Add spacing below the headings */
+            text-align: center;
+            /* Center-align the column headers */
+        }
+
+        .columns .left div,
+        .columns .right div {
+            line-height: 1.5em;
+            /* Add space between placeholder rows */
+            text-align: center;
+            /* Center-align the text */
+        }
+
+        .bottom-buttons {
+            margin-top: 30px;
+            /* Add spacing above buttons */
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            /* Adjust spacing between buttons */
+        }
+
+        .bottom-buttons button {
+            padding: 10px 20px;
+            /* Reduced padding for compact buttons */
+            font-size: 1.2em;
+            background-color: var(--highlight-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .bottom-buttons button:hover {
+            background-color: white;
+            color: var(--highlight-color);
+            transform: scale(1.05);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255, 255, 255, 0.1) 20px, rgba(255, 255, 255, 0.1) 40px);
+            z-index: -1;
+        }
+
+
+        .columns h3 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Word of the Day</h1>
+
+    <div class="input-container">
+        <input type="text" id="word" placeholder="Word">
+        <input type="text" id="definition" placeholder="Definition">
+        <div class="columns">
+            <div class="left">
+                <h3>Synonyms</h3>
+                <input type="text" id="synonym1" placeholder="Synonym 1">
+                <input type="text" id="synonym2" placeholder="Synonym 2">
+                <input type="text" id="synonym3" placeholder="Synonym 3">
+                <input type="text" id="synonym4" placeholder="Synonym 4">
+            </div>
+            <div class="right">
+                <h3>Antonyms</h3>
+                <input type="text" id="antonym1" placeholder="Antonym 1">
+                <input type="text" id="antonym2" placeholder="Antonym 2">
+                <input type="text" id="antonym3" placeholder="Antonym 3">
+                <input type="text" id="antonym4" placeholder="Antonym 4">
+            </div>
+        </div>
+        <button onclick="createWord()">Create</button>
+    </div>
+
+    <div class="output-container">
+        <div id="wordOutput" class="word"></div>
+        <div class="definition" id="definitionOutput"></div>
+        <div class="columns">
+            <div class="left">
+                <p>Synonyms</p>
+                <div id="synonymsColumn"></div>
+            </div>
+            <div class="right">
+                <p>Antonyms</p>
+                <div id="antonymsColumn"></div>
+            </div>
+        </div>
+        <div class="bottom-buttons">
+            <button onclick="revealNext()">Reveal</button>
+            <button onclick="resetForm()">Reset</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        let word = "";
+        let definition = "";
+        let antonyms = [];
+        let synonyms = [];
+        let revealIndex = 0;
+
+
+        function setRandomColors() {
+            const colorOptions = [
+                { background: "#5a5eff", text: "white", highlight: "#ffb6c1" },
+                { background: "#333333", text: "white", highlight: "#faff00" },
+                { background: "#d32f2f", text: "white", highlight: "#f5f5f5" },
+                { background: "#a2cffe", text: "white", highlight: "white" },
+                { background: "#87ceeb", text: "white", highlight: "#ff69b4" },
+            ];
+
+            const randomColors = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+
+            document.documentElement.style.setProperty('--background-color', randomColors.background);
+            document.documentElement.style.setProperty('--text-color', randomColors.text);
+            document.documentElement.style.setProperty('--highlight-color', randomColors.highlight);
+        }
+
+
+        function createWord() {
+
+            // Retrieve and trim inputs
+            word = document.getElementById("word").value.trim();
+            definition = document.getElementById("definition").value.trim();
+
+            if (word === "" || definition === "") {
+                alert("Please enter both a word and a definition.");
+                return;
+            }
+
+            antonyms = [
+                document.getElementById("antonym1").value.trim(),
+                document.getElementById("antonym2").value.trim(),
+                document.getElementById("antonym3").value.trim(),
+                document.getElementById("antonym4").value.trim(),
+            ].filter(Boolean); // Remove empty inputs
+            synonyms = [
+                document.getElementById("synonym1").value.trim(),
+                document.getElementById("synonym2").value.trim(),
+                document.getElementById("synonym3").value.trim(),
+                document.getElementById("synonym4").value.trim(),
+            ].filter(Boolean); // Remove empty inputs
+
+            // Hide input container and show output container
+            document.querySelector(".input-container").style.display = "none";
+            const outputContainer = document.querySelector(".output-container");
+            outputContainer.style.display = "flex";
+            outputContainer.style.visibility = "visible";
+
+            // Set word output with underscores for each letter (spaces handled correctly)
+            const wordOutput = word
+                ? word.split("").map(letter => (letter === " " ? "&nbsp;" : "_")).join(" ")
+                : "_";
+            document.getElementById("wordOutput").innerHTML = wordOutput;
+
+            // Set definition output
+            document.getElementById("definitionOutput").innerHTML = definition || "_";
+
+            // Generate placeholders for synonyms and antonyms
+            const synonymPlaceholders = synonyms.map(synonym =>
+                synonym.split("").map(() => "_").join(" ")
+            );
+            const antonymPlaceholders = antonyms.map(antonym =>
+                antonym.split("").map(() => "_").join(" ")
+            );
+
+            // Populate the columns
+            document.getElementById("synonymsColumn").innerHTML = synonymPlaceholders
+                .map(placeholder => `<div>${placeholder}</div>`)
+                .join("");
+            document.getElementById("antonymsColumn").innerHTML = antonymPlaceholders
+                .map(placeholder => `<div>${placeholder}</div>`)
+                .join("");
+
+            // Ensure bottom buttons are visible
+            document.querySelector(".bottom-buttons").style.visibility = "visible";
+        }
+
+        function revealNext() {
+            const totalItems = 1 + synonyms.length + antonyms.length; // Total items to reveal (word + synonyms + antonyms)
+
+            if (revealIndex === 0) {
+                // Reveal the main word
+                document.getElementById("wordOutput").innerHTML = word;
+            } else if (revealIndex <= synonyms.length) {
+                // Reveal a synonym sequentially
+                const synonymIndex = revealIndex - 1;
+                const synonymDivs = document.getElementById("synonymsColumn").children;
+                if (synonyms[synonymIndex]) {
+                    synonymDivs[synonymIndex].innerHTML = synonyms[synonymIndex];
+                }
+            } else if (revealIndex <= synonyms.length + antonyms.length) {
+                // Reveal an antonym sequentially
+                const antonymIndex = revealIndex - 1 - synonyms.length;
+                const antonymDivs = document.getElementById("antonymsColumn").children;
+                if (antonyms[antonymIndex]) {
+                    antonymDivs[antonymIndex].innerHTML = antonyms[antonymIndex];
+                }
+            } else {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                return;
+            }
+            revealIndex++;
+        }
+
+        function resetForm() {
+            // Reset values
+            word = "";
+            definition = "";
+            synonyms = [];
+            antonyms = [];
+            revealIndex = 0;
+
+            // Show input container and hide output container
+            document.querySelector(".input-container").style.display = "flex";
+            document.querySelector(".output-container").style.display = "none";
+            document.querySelector(".output-container").style.visibility = "hidden";
+
+            // Clear all input fields
+            document.querySelectorAll(".input-container input").forEach(input => (input.value = ""));
+
+            // Reset output fields
+            document.getElementById("wordOutput").innerHTML = "";
+            document.getElementById("definitionOutput").innerHTML = "";
+            document.getElementById("synonymsColumn").innerHTML = "";
+            document.getElementById("antonymsColumn").innerHTML = "";
+
+            // Hide bottom buttons
+            document.querySelector(".bottom-buttons").style.visibility = "hidden";
+        }
+    </script>
+</body>
+
+</html>
