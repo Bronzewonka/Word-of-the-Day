@@ -154,9 +154,12 @@
     <div class="input-container">
         <input type="text" id="word" placeholder="Word">
         <input type="text" id="definition" placeholder="Definition">
+        <div class="buttons">
+        <button id="importButton" onclick="importWord()">Import</button>
         <button onclick="createWord()">Create</button>
+        </div>
     </div>
-
+    
     <div class="output-container" id="output"></div>
 
     <div class="bottom-buttons" id="bottomButtons">
@@ -167,7 +170,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
         let originalWord = "";
-
+        let timeoutId;
         function setRandomColors() {
             const colorOptions = [
                 { background: "#5a5eff", text: "white", highlight: "#ffb6c1" },
@@ -201,9 +204,10 @@
             document.getElementById("output").innerHTML = `<p><strong>Word:</strong> ${blankWord}</p><p><strong>Definition:</strong> ${definition}</p>`;
 
             document.querySelectorAll('.input-container input').forEach(input => input.style.display = "none");
-            document.querySelector('.input-container button').style.display = "none";
+            document.querySelector('.input-container .buttons').style.display = "none";
 
             document.getElementById("bottomButtons").style.visibility = "visible";
+            clearTimeout(timeoutId);
         }
 
         function revealWord() {
@@ -218,7 +222,7 @@
                 });
 
                 // Set a timeout to remove the word-reveal effect after 4 seconds
-                setTimeout(function() {
+                timeoutId = setTimeout(function() {
                     outputDiv.innerHTML = `<p style=" transform: scale(2)">${originalWord}</p>`;
                  }, 4500);
             }
@@ -233,9 +237,46 @@
                 input.value = "";
                 input.style.display = "block";
             });
-            document.querySelector('.input-container button').style.display = "block";
+            document.querySelector('.input-container .buttons').style.display = "block";
 
             document.getElementById("bottomButtons").style.visibility = "hidden";
+        }
+
+        async function importWord() {
+            const word = prompt("Enter the word to import:");
+
+            if (!word) {
+                alert("Please enter a word.");
+                return;
+            }
+
+            // Show spinner on the Import button
+            const importButton = document.getElementById("importButton");
+            importButton.innerHTML = "Fetching Results...";
+            importButton.disabled = true;
+
+            try {
+                // Fetch data from DictionaryAPI
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const data = await response.json();
+
+                // Extract definitions, synonyms, and antonyms
+                const meaning = data[0]?.meanings[0];
+                const definition = meaning?.definitions[0]?.definition || "No definition available.";
+             
+                // Populate fields
+                document.getElementById("definition").value = definition;
+                document.getElementById("word").value = word;
+
+                alert(`Data for "${word}" imported successfully!`);
+            } catch (error) {
+                console.error("Error fetching word data:", error);
+                alert("Could not fetch data. Please try again later.");
+            } finally {
+                // Reset the Import button
+                importButton.innerHTML = "Import";
+                importButton.disabled = false;
+            }
         }
 
         window.onload = setRandomColors;
