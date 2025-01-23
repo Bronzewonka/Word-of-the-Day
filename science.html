@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word of the Day</title>
+    <style>
+        :root {
+            --background-color: #5a5eff;
+            /* Soft blue */
+            --text-color: white;
+            --highlight-color: #80b380;
+            /* Softened green */
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10%),
+                radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 90vh;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--highlight-color);
+            text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+            font-size: 6em;
+            margin-bottom: 40px;
+        }
+
+        .input-container {
+            margin-top: 0;
+            /* Remove excessive top margin */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-container input {
+            padding: 15px;
+            margin: 10px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, font-size 0.3s ease;
+        }
+
+        .input-container input::placeholder {
+            color: #888;
+        }
+
+        .input-container button {
+            padding: 20px 40px;
+            margin-top: 50px;
+            font-size: 2em;
+            background-color: var(--highlight-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .input-container button:hover {
+            background-color: white;
+            color: var(--highlight-color);
+            transform: scale(1.05);
+        }
+
+        .output-container {
+            margin-top: 40px;
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .bottom-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            visibility: hidden;
+        }
+
+        .bottom-buttons button {
+            padding: 20px 40px;
+            font-size: 2em;
+            background-color: var(--highlight-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .bottom-buttons button:hover {
+            background-color: white;
+            color: var(--highlight-color);
+            transform: scale(1.05);
+        }
+
+        .word-reveal {
+            animation: expandShrink 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes expandShrink {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(2);
+            }
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255, 255, 255, 0.1) 20px, rgba(255, 255, 255, 0.1) 40px);
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Word of the Day</h1>
+
+    <div class="input-container">
+        <input type="text" id="word" placeholder="Word">
+        <input type="text" id="definition" placeholder="Definition">
+        <button onclick="createWord()">Create</button>
+    </div>
+
+    <div class="output-container" id="output"></div>
+
+    <div class="bottom-buttons" id="bottomButtons">
+        <button onclick="revealWord()">Reveal</button>
+        <button onclick="resetForm()">Done</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        let originalWord = "";
+
+        function setRandomColors() {
+            const colorOptions = [
+                { background: "#5a5eff", text: "white", highlight: "#ffb6c1" },
+                { background: "#333333", text: "white", highlight: "#faff00" },
+                { background: "#d32f2f", text: "white", highlight: "#f5f5f5" },
+                { background: "#a2cffe", text: "white", highlight: "white" },
+                { background: "#87ceeb", text: "white", highlight: "#ff69b4" },
+            ];
+
+            const randomColors = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+
+            document.documentElement.style.setProperty('--background-color', randomColors.background);
+            document.documentElement.style.setProperty('--text-color', randomColors.text);
+            document.documentElement.style.setProperty('--highlight-color', randomColors.highlight);
+        }
+
+        function createWord() {
+            const wordInput = document.getElementById("word");
+            const definitionInput = document.getElementById("definition");
+            const word = wordInput.value.trim();
+            const definition = definitionInput.value.trim();
+
+            if (word === "" || definition === "") {
+                alert("Please enter both a word and a definition.");
+                return;
+            }
+
+            originalWord = word;
+
+            const blankWord = word.split('').map(letter => (letter === ' ' ? '&nbsp;&nbsp;' : '_')).join(' ');
+            document.getElementById("output").innerHTML = `<p><strong>Word:</strong> ${blankWord}</p><p><strong>Definition:</strong> ${definition}</p>`;
+
+            document.querySelectorAll('.input-container input').forEach(input => input.style.display = "none");
+            document.querySelector('.input-container button').style.display = "none";
+
+            document.getElementById("bottomButtons").style.visibility = "visible";
+        }
+
+        function revealWord() {
+            if (originalWord) {
+                const outputDiv = document.getElementById("output");
+                outputDiv.innerHTML = `<p class="word-reveal">${originalWord}</p>`;
+
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                // Set a timeout to remove the word-reveal effect after 4 seconds
+                setTimeout(function() {
+                    outputDiv.innerHTML = `<p style=" transform: scale(2)">${originalWord}</p>`;
+                 }, 4500);
+            }
+
+            
+
+        }
+
+        function resetForm() {
+            document.getElementById("output").innerHTML = "";
+            document.querySelectorAll('.input-container input').forEach(input => {
+                input.value = "";
+                input.style.display = "block";
+            });
+            document.querySelector('.input-container button').style.display = "block";
+
+            document.getElementById("bottomButtons").style.visibility = "hidden";
+        }
+
+        window.onload = setRandomColors;
+    </script>
+</body>
+
+</html>
